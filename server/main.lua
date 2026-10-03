@@ -47,7 +47,7 @@ local function BroadcastPlayers()
                 id = id,
                 name = GetPlayerName(playerId),
                 color = GetColor(id),
-                hidden = hiddenPlayers[id] == true
+                hidden = Config.SyncBlipToggle and hiddenPlayers[id] == true or false
             }
 
             if not entry.hidden then
@@ -73,6 +73,10 @@ end)
 RegisterNetEvent('tpmenu:toggleBlip', function(targetId)
     local src = source
     targetId = tonumber(targetId)
+
+    if not Config.SyncBlipToggle then
+        return
+    end
 
     if not targetId or not GetPlayerName(targetId) then
         return

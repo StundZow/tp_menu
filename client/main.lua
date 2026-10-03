@@ -1,9 +1,19 @@
 local latestPlayers = {}
 local blips = {}
+local localHidden = {} -- [serverId] = true, utilisé seulement si Config.SyncBlipToggle = false
 local menuOpen = false
 
 local function GetMyServerId()
     return GetPlayerServerId(PlayerId())
+end
+
+-- Synchro activée : l'état vient du serveur (identique pour tous).
+-- Synchro désactivée : chacun masque les blips pour soi uniquement.
+local function IsHidden(p)
+    if Config.SyncBlipToggle then
+        return p.hidden == true
+    end
+    return localHidden[p.id] == true
 end
 
 local function BuildMenuList(players)
@@ -14,7 +24,8 @@ local function BuildMenuList(players)
             list[#list + 1] = {
                 id = p.id,
                 name = p.name,
-                blipHidden = p.hidden == true
+                blipHidden = IsHidden(p),
+                sync = Config.SyncBlipToggle == true
             }
         end
     end
@@ -29,7 +40,7 @@ local function UpdateBlips(players)
         if p.id ~= myId then
             seen[p.id] = true
 
-            if p.hidden then
+            if IsHidden(p) then
                 if blips[p.id] then
                     RemoveBlip(blips[p.id])
                     blips[p.id] = nil
@@ -60,6 +71,13 @@ local function UpdateBlips(players)
         if not seen[id] then
             RemoveBlip(blip)
             blips[id] = nil
+        end
+    end
+
+    -- oublie les masquages locaux des joueurs partis (les IDs peuvent être réutilisés)
+    for id in pairs(localHidden) do
+        if not seen[id] then
+            localHidden[id] = nil
         end
     end
 end
@@ -121,9 +139,23 @@ RegisterNUICallback('tpPlayerToMe', function(data, cb)
     cb('ok')
 end)
 
--- Le serveur gère l'état (global) et renvoie la liste à jour à tout le monde
 RegisterNUICallback('toggleBlip', function(data, cb)
-    TriggerServerEvent('tpmenu:toggleBlip', data.id)
+    if Config.SyncBlipToggle then
+        -- Le serveur gère l'état et renvoie la liste à jour à tout le monde
+        TriggerServerEvent('tpmenu:toggleBlip', data.id)
+    else
+        local id = tonumber(data.id)
+        if localHidden[id] then
+            localHidden[id] = nil
+        else
+            localHidden[id] = true
+        end
+        UpdateBlips(latestPlayers)
+        SendNUIMessage({
+            action = 'updatePlayers',
+            players = BuildMenuList(latestPlayers)
+        })
+    end
     cb('ok')
 end)
 

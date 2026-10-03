@@ -33,7 +33,7 @@ function renderPlayers(players) {
 
     row.innerHTML = `
       <div class="player-info">
-        <button class="blip-toggle ${p.blipHidden ? 'off' : ''}" title="${p.blipHidden ? 'Blip masqué pour tout le monde - cliquer pour réafficher' : 'Masquer ce joueur de la carte pour tout le monde'}">
+        <button class="blip-toggle ${p.blipHidden ? 'off' : ''}" title="${blipTitle(p)}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9"></circle>
             <polygon points="15,9 13,13 9,15 11,11" fill="currentColor" stroke="none"></polygon>
@@ -64,6 +64,13 @@ function renderPlayers(players) {
 
     playerList.appendChild(row);
   });
+}
+
+function blipTitle(p) {
+  const scope = p.sync ? 'pour tout le monde' : 'pour vous';
+  return p.blipHidden
+    ? `Blip masqué ${scope} - cliquer pour réafficher`
+    : `Masquer le blip de ce joueur ${scope}`;
 }
 
 function escapeHtml(str) {

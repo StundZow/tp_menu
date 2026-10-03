@@ -19,9 +19,14 @@ Config.MenuKey = 'F9'
 --   add_principal identifier.license:XXXX group.admin
 Config.AcePermission = false
 
--- Permission ACE requise pour masquer/afficher le blip d'un joueur.
--- ATTENTION : ce réglage est GLOBAL, masquer un joueur le masque pour tout le
--- monde sur le serveur. Sur un serveur public, il est conseillé de le restreindre :
+-- Synchronisation du bouton boussole (masquer/afficher le blip d'un joueur) :
+--   true  = synchro : masquer un joueur le masque pour TOUT LE MONDE
+--   false = local   : chacun masque les blips uniquement pour soi
+Config.SyncBlipToggle = true
+
+-- Permission ACE requise pour masquer/afficher un blip (uniquement si
+-- Config.SyncBlipToggle = true, car c'est alors global).
+-- Sur un serveur public, il est conseillé de la restreindre :
 --   Config.BlipTogglePermission = 'tpmenu.blips'
 --   add_ace group.admin tpmenu.blips allow
 -- Mettre `false` pour autoriser tout le monde.
