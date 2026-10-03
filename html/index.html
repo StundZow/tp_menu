@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>TP Menu</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app" class="hidden">
+    <div class="panel">
+      <div class="panel-header">
+        <h1>Téléportation</h1>
+        <button id="closeBtn" class="close-btn" title="Fermer (ESC)">✕</button>
+      </div>
+
+      <input id="search" type="text" placeholder="Rechercher un joueur..." autocomplete="off">
+
+      <div id="playerList" class="player-list">
+        <p class="empty-state">Aucun joueur en ligne.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
