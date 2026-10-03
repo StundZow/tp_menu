@@ -30,11 +30,11 @@ Ressource FiveM permettant de :
 - Pour chaque joueur : bouton **Aller vers** (vous vous téléportez à lui) ou
   **Faire venir** (il est téléporté à vous).
 - L'icône boussole grise à gauche du nom permet d'afficher/masquer le blip de ce joueur
-  (icône grisée = masqué). Deux modes via `Config.SyncBlipToggle` :
-  - `true` (défaut) : **synchronisé pour tout le monde** — si vous masquez un joueur,
+  (icône grisée = masqué). Un interrupteur **« Synchroniser les blips »** en haut du menu choisit le mode (mémorisé pour chaque joueur) :
+  - activé (défaut) : **synchronisé pour tout le monde** — si vous masquez un joueur,
     plus personne ne le voit sur sa carte (le serveur n'envoie même plus sa position).
     Le menu de chaque joueur se met à jour en direct.
-  - `false` : chacun masque les blips uniquement pour soi.
+  - désactivé : vous masquez les blips uniquement pour vous.
 - `ESC` ou le bouton ✕ ferme le menu.
 
 Tous les joueurs apparaissent en permanence sur la mini-map sous forme de blips,
@@ -48,8 +48,8 @@ dans `config.lua` pour personnaliser la palette).
 | `Config.Command` | Nom de la commande console/chat (`tp` par défaut) |
 | `Config.MenuKey` | Touche par défaut pour ouvrir le menu (`F9` par défaut, remappable en jeu) |
 | `Config.AcePermission` | Permission ACE requise pour téléporter (false = tout le monde autorisé) |
-| `Config.SyncBlipToggle` | `true` = le bouton boussole masque le blip pour tout le monde, `false` = chacun pour soi |
-| `Config.BlipTogglePermission` | Permission ACE requise pour masquer/afficher un blip (false = tout le monde) |
+| `Config.DefaultSyncMode` | Valeur par défaut de l'interrupteur de synchro du menu (`true` = pour tout le monde) |
+| `Config.BlipTogglePermission` | Permission ACE requise pour masquer un blip *pour tout le monde* (false = tout le monde) |
 | `Config.UpdateInterval` | Fréquence (ms) de mise à jour des positions/blips |
 | `Config.BlipSprite`, `Config.BlipScale` | Apparence des blips |
 | `Config.ShowBlipName` | Affiche le nom du joueur sur son blip |

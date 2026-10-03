@@ -1,19 +1,26 @@
 local latestPlayers = {}
 local blips = {}
-local localHidden = {} -- [serverId] = true, utilisé seulement si Config.SyncBlipToggle = false
+local localHidden = {} -- [serverId] = true : blips que JE masque pour moi seul
 local menuOpen = false
+
+local KVP_SYNC_MODE = 'tpmenu_sync_mode'
+
+-- Mode du bouton boussole, réglable dans le menu et mémorisé entre les sessions :
+--   true  = masquer un joueur le masque pour TOUT LE MONDE (géré par le serveur)
+--   false = masquer un joueur uniquement pour moi
+local syncMode = Config.DefaultSyncMode
+local savedMode = GetResourceKvpString(KVP_SYNC_MODE)
+if savedMode then
+    syncMode = savedMode == '1'
+end
 
 local function GetMyServerId()
     return GetPlayerServerId(PlayerId())
 end
 
--- Synchro activée : l'état vient du serveur (identique pour tous).
--- Synchro désactivée : chacun masque les blips pour soi uniquement.
-local function IsHidden(p)
-    if Config.SyncBlipToggle then
-        return p.hidden == true
-    end
-    return localHidden[p.id] == true
+-- Un blip est affiché seulement s'il n'est masqué ni globalement ni par moi
+local function IsBlipHidden(p)
+    return p.hidden == true or localHidden[p.id] == true
 end
 
 local function BuildMenuList(players)
@@ -24,12 +31,20 @@ local function BuildMenuList(players)
             list[#list + 1] = {
                 id = p.id,
                 name = p.name,
-                blipHidden = IsHidden(p),
-                sync = Config.SyncBlipToggle == true
+                -- l'icône reflète l'état du mode actuellement sélectionné
+                blipHidden = syncMode and p.hidden == true or (not syncMode and localHidden[p.id] == true)
             }
         end
     end
     return list
+end
+
+local function PushMenu(action)
+    SendNUIMessage({
+        action = action,
+        players = BuildMenuList(latestPlayers),
+        sync = syncMode
+    })
 end
 
 local function UpdateBlips(players)
@@ -40,7 +55,7 @@ local function UpdateBlips(players)
         if p.id ~= myId then
             seen[p.id] = true
 
-            if IsHidden(p) then
+            if IsBlipHidden(p) then
                 if blips[p.id] then
                     RemoveBlip(blips[p.id])
                     blips[p.id] = nil
@@ -87,10 +102,7 @@ RegisterNetEvent('tpmenu:updatePlayers', function(players)
     UpdateBlips(players)
 
     if menuOpen then
-        SendNUIMessage({
-            action = 'updatePlayers',
-            players = BuildMenuList(players)
-        })
+        PushMenu('updatePlayers')
     end
 end)
 
@@ -103,10 +115,7 @@ local function OpenMenu()
     if menuOpen then return end
     menuOpen = true
     SetNuiFocus(true, true)
-    SendNUIMessage({
-        action = 'open',
-        players = BuildMenuList(latestPlayers)
-    })
+    PushMenu('open')
 end
 
 local function CloseMenu()
@@ -139,8 +148,16 @@ RegisterNUICallback('tpPlayerToMe', function(data, cb)
     cb('ok')
 end)
 
+-- Interrupteur du menu : "pour tout le monde" / "pour moi seulement"
+RegisterNUICallback('setSyncMode', function(data, cb)
+    syncMode = data.sync == true
+    SetResourceKvp(KVP_SYNC_MODE, syncMode and '1' or '0')
+    PushMenu('updatePlayers')
+    cb('ok')
+end)
+
 RegisterNUICallback('toggleBlip', function(data, cb)
-    if Config.SyncBlipToggle then
+    if syncMode then
         -- Le serveur gère l'état et renvoie la liste à jour à tout le monde
         TriggerServerEvent('tpmenu:toggleBlip', data.id)
     else
@@ -151,10 +168,7 @@ RegisterNUICallback('toggleBlip', function(data, cb)
             localHidden[id] = true
         end
         UpdateBlips(latestPlayers)
-        SendNUIMessage({
-            action = 'updatePlayers',
-            players = BuildMenuList(latestPlayers)
-        })
+        PushMenu('updatePlayers')
     end
     cb('ok')
 end)

@@ -1,5 +1,8 @@
 let currentPlayers = [];
+let currentSync = true;
 
+const syncToggle = document.getElementById('syncToggle');
+const syncHint = document.getElementById('syncHint');
 const app = document.getElementById('app');
 const playerList = document.getElementById('playerList');
 const searchInput = document.getElementById('search');
@@ -66,8 +69,16 @@ function renderPlayers(players) {
   });
 }
 
+function setSync(sync) {
+  currentSync = sync;
+  syncToggle.checked = sync;
+  syncHint.textContent = sync
+    ? 'Masquer un joueur = masqué pour tout le monde'
+    : 'Masquer un joueur = masqué pour vous seulement';
+}
+
 function blipTitle(p) {
-  const scope = p.sync ? 'pour tout le monde' : 'pour vous';
+  const scope = currentSync ? 'pour tout le monde' : 'pour vous';
   return p.blipHidden
     ? `Blip masqué ${scope} - cliquer pour réafficher`
     : `Masquer le blip de ce joueur ${scope}`;
@@ -80,6 +91,10 @@ function escapeHtml(str) {
 }
 
 searchInput.addEventListener('input', () => renderPlayers(currentPlayers));
+
+syncToggle.addEventListener('change', () => {
+  postNui('setSyncMode', { sync: syncToggle.checked });
+});
 
 closeBtn.addEventListener('click', () => postNui('close'));
 
@@ -94,6 +109,7 @@ window.addEventListener('message', (event) => {
 
   if (data.action === 'open') {
     currentPlayers = data.players || [];
+    setSync(data.sync !== false);
     app.classList.remove('hidden');
     searchInput.value = '';
     renderPlayers(currentPlayers);
@@ -102,6 +118,7 @@ window.addEventListener('message', (event) => {
     app.classList.add('hidden');
   } else if (data.action === 'updatePlayers') {
     currentPlayers = data.players || [];
+    setSync(data.sync !== false);
     if (!app.classList.contains('hidden')) {
       renderPlayers(currentPlayers);
     }

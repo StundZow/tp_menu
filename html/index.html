@@ -13,6 +13,17 @@
         <button id="closeBtn" class="close-btn" title="Fermer (ESC)">✕</button>
       </div>
 
+      <label class="sync-row" for="syncToggle">
+        <span class="sync-text">
+          <span class="sync-title">Synchroniser les blips</span>
+          <span id="syncHint" class="sync-hint">Masquer un joueur = masqué pour tout le monde</span>
+        </span>
+        <span class="switch">
+          <input id="syncToggle" type="checkbox">
+          <span class="slider"></span>
+        </span>
+      </label>
+
       <input id="search" type="text" placeholder="Rechercher un joueur..." autocomplete="off">
 
       <div id="playerList" class="player-list">
